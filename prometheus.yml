@@ -1,0 +1,32 @@
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - {IP o Reverse DNS	de Alert Manager}:{puerto}
+
+rule_files:
+    - rules.yml
+
+scrape_configs:
+  # Identificar los nanodes corriendo para hacer 'scrape'.
+  - job_name: "linode"
+    linode_sd_configs:
+      - authorization:
+          credentials: "{API token}"
+    relabel_configs:
+      #  Monitorear solo los nanodes que con la etiqueta 'X'.
+      - source_labels: [__meta_linode_tags]
+        regex: ".*,{X},.*"
+        action: keep
+
+      # Usar la IPv6 publica para analizar los nodos. Esta se obtiene de la metadata de la instancia, y se pasa como parametro usando $1. El puerto corresponde a lo configurado en NodeExporter
+      - source_labels: [__meta_linode_public_ipv6]
+        target_label: __address__
+        replacement: "[$1]:{puerto}"
+
+      # Usar la etiquta de Linode para identificar la instancia
+      - source_labels: [__meta_linode_instance_label]
+        action: replace
+        target_label: instance
+
+

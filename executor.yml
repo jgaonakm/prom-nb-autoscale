@@ -1,0 +1,9 @@
+listen_address: ":{puerto}"
+verbose: true
+commands:
+  - cmd: /path/to/scaleOut.sh
+    # Ejecutar el script solamente para las alertas con las siguientes etiquetas
+    match_labels:
+      "alertname": "HighLoad"
+    notify_on_failure: false
+    resolved_signal: SIGUSR1

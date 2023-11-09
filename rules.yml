@@ -1,0 +1,19 @@
+groups:
+- name: AllInstances
+  rules:
+  - alert: HighLoad
+    # Condición de ejecución; Promedio de CPU de todos los nodos > al 70% por 5m
+    expr: avg_cpu_load5 > 0.7
+    for: 5m
+    labels:
+      severity: 'critical'
+    annotations:
+      summary: "Instancias saturadas > 5m"
+      description: "Instancias del job {{ $labels.job }} han estado saturadas por mas de 5 minutos. ({{humanizePercentage .Value }})"
+
+
+# Sumarización de datos en una nueva serie
+- name: avg-data
+  rules:
+  - record: avg_cpu_load5
+    expr: avg(1- (irate(node_cpu_seconds_total{mode="idle"}[5m]) / on(instance) group_left sum by (instance)((irate(node_cpu_seconds_total[5m])))))
